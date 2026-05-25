@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EDITH — Every Day Intelligence & Task Handler</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      #08080e;
+    --bg2:     #0f0f18;
+    --bg3:     #16162a;
+    --border:  rgba(255,255,255,0.07);
+    --text:    #f0eeff;
+    --text2:   #a099cc;
+    --text3:   #5a5478;
+    --accent:  #7c6af7;
+    --green:   #22c55e;
+    --amber:   #f59e0b;
+    --red:     #ef4444;
+    --pink:    #e879f9;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #08080e 0%, #150f2e 50%, #08080e 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 56px 40px 48px;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .hero-orb1 {
+    position: absolute; top: -80px; right: -80px;
+    width: 360px; height: 360px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,106,247,0.18) 0%, transparent 70%);
+    pointer-events: none;
+    animation: pulseOrb 6s ease-in-out infinite;
+  }
+  .hero-orb2 {
+    position: absolute; bottom: -60px; left: 80px;
+    width: 260px; height: 260px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%);
+    pointer-events: none;
+    animation: pulseOrb 8s ease-in-out infinite reverse;
+  }
+
+  @keyframes pulseOrb {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%       { transform: scale(1.12); opacity: 0.7; }
+  }
+
+  .hero-inner { position: relative; max-width: 720px; margin: 0 auto; }
+
+  .hero-emoji {
+    font-size: 52px;
+    margin-bottom: 14px;
+    display: block;
+    animation: bobIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  @keyframes bobIn {
+    from { transform: scale(0.5) translateY(-20px); opacity: 0; }
+    to   { transform: scale(1) translateY(0);       opacity: 1; }
+  }
+
+  .hero h1 {
+    font-size: 52px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    margin-bottom: 6px;
+    animation: fadeUp 0.5s 0.1s both;
+  }
+  .hero h1 .accent { color: var(--accent); }
+
+  .hero-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    animation: fadeUp 0.5s 0.2s both;
+  }
+
+  .hero-desc {
+    font-size: 14px;
+    color: var(--text2);
+    max-width: 460px;
+    margin: 0 auto 28px;
+    line-height: 1.8;
+    animation: fadeUp 0.5s 0.3s both;
+  }
+
+  @keyframes fadeUp {
+    from { transform: translateY(16px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  /* ── STATUS BADGES ── */
+  .badges {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeUp 0.5s 0.4s both;
+  }
+  .badge {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-weight: 500;
+    transition: transform 0.15s;
+    cursor: default;
+  }
+  .badge:hover { transform: translateY(-1px); }
+  .badge.on  { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+  .badge.off { background: rgba(255,255,255,0.04); color: var(--text3); border: 1px solid var(--border); }
+
+  /* ── MAIN WRAPPER ── */
+  .main { max-width: 900px; margin: 0 auto; padding: 36px 24px; }
+
+  /* ── STATS ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 16px;
+    text-align: center;
+    transition: transform 0.2s, border-color 0.2s;
+    animation: fadeUp 0.5s var(--d, 0s) both;
+  }
+  .stat-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+  .stat-icon { font-size: 20px; margin-bottom: 8px; }
+  .stat-val  { font-size: 28px; font-weight: 800; color: var(--accent); margin-bottom: 2px; }
+  .stat-lbl  { font-size: 10px; color: var(--text3); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── BUILDER CARD ── */
+  .builder-card {
+    background: linear-gradient(135deg, var(--bg2), var(--bg3));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .builder-emoji { font-size: 40px; flex-shrink: 0; }
+  .builder-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .builder-name  { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .builder-desc  { font-size: 13px; color: var(--text2); line-height: 1.7; }
+
+  /* ── WHAT IS EDITH ── */
+  .what-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+  .what-card h2 { font-size: 15px; font-weight: 700; margin-bottom: 14px; color: var(--accent); }
+  .what-card p  { font-size: 13px; color: var(--text2); line-height: 1.85; margin-bottom: 12px; }
+  .what-card p:last-child { margin-bottom: 0; }
+  .what-card strong { color: var(--text); }
+  .what-card .hl { color: var(--accent); font-weight: 700; }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .tab-btn {
+    padding: 9px 18px;
+    font-size: 12px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: color 0.15s, background 0.15s;
+    outline: none;
+    color: var(--text3);
+    background: transparent;
+  }
+  .tab-btn.active {
+    background: var(--bg2);
+    border-color: var(--border);
+    border-bottom-color: var(--bg2);
+    color: var(--accent);
+    margin-bottom: -1px;
+  }
+  .tab-btn:not(.active):hover { color: var(--text2); }
+
+  /* ── TAB PANELS ── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── FEATURE GRID ── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .feature-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 0 0 12px 12px;
+    padding: 18px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    cursor: default;
+  }
+  .feature-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.4);
+  }
+  .feature-icon  { font-size: 22px; margin-bottom: 10px; }
+  .feature-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .feature-desc  { font-size: 11.5px; color: var(--text2); line-height: 1.75; }
+
+  /* ── COMING SOON ── */
+  .coming-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .coming-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    opacity: 0.8;
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+  }
+  .coming-soon-badge {
+    position: absolute; top: 10px; right: 10px;
+    font-size: 9px; padding: 2px 8px; border-radius: 8px;
+    background: rgba(124,106,247,0.15); color: var(--accent);
+    border: 1px solid rgba(124,106,247,0.3);
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+  }
+  .coming-icon  { font-size: 22px; margin-bottom: 10px; }
+  .coming-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+  .coming-desc  { font-size: 11.5px; color: var(--text3); line-height: 1.75; }
+
+  /* ── TECH STACK ── */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .tech-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: border-color 0.15s;
+  }
+  .tech-card:hover { border-color: rgba(255,255,255,0.18); }
+  .tech-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .tech-lbl  { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+  .tech-val  { font-size: 12.5px; color: var(--text); font-weight: 600; }
+
+  .arch-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .arch-title { font-size: 13px; font-weight: 700; margin-bottom: 16px; color: var(--accent); }
+  .arch-pre {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+    line-height: 2;
+    overflow: auto;
+    white-space: pre;
+  }
+
+  /* ── CHANGELOG ── */
+  .changelog-entry {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 0 12px 12px 0;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .cl-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .cl-version { font-size: 15px; font-weight: 700; }
+  .cl-date {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text3);
+    background: var(--bg3);
+    padding: 2px 10px;
+    border-radius: 10px;
+  }
+  .cl-items {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 16px;
+  }
+  .cl-item { font-size: 12px; color: var(--text2); line-height: 1.85; }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 36px 0 16px;
+    border-top: 1px solid var(--border);
+    margin-top: 36px;
+  }
+  .footer-emoji { font-size: 28px; margin-bottom: 8px; }
+  .footer-line1 { font-size: 13px; color: var(--text3); margin-bottom: 4px; }
+  .footer-line2 { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); opacity: 0.45; }
+
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 36px; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .builder-card { flex-direction: column; text-align: center; }
+    .cl-items { grid-template-columns: 1fr; }
+    .tabs { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-orb1"></div>
+  <div class="hero-orb2"></div>
+  <div class="hero-inner">
+    <span class="hero-emoji">🤖</span>
+    <h1><span class="accent">E</span>DITH</h1>
+    <div class="hero-sub">Every Day Intelligence &amp; Task Handler</div>
+    <p class="hero-desc">A personal AI operating system that thinks like you, works like you, and acts on your behalf. Your second brain — powered by Claude.</p>
+    <div class="badges">
+      <span class="badge on">● Claude API</span>
+      <span class="badge on">● MySQL DB</span>
+      <span class="badge on" id="badge-gmail">● Gmail</span>
+      <span class="badge on" id="badge-slack">● Slack</span>
+      <span class="badge off" id="badge-bq">○ BigQuery</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card" style="--d:0.05s">
+      <div class="stat-icon">🔧</div>
+      <div class="stat-val">15</div>
+      <div class="stat-lbl">AI Tools</div>
+    </div>
+    <div class="stat-card" style="--d:0.1s">
+      <div class="stat-icon">🗄️</div>
+      <div class="stat-val">8</div>
+      <div class="stat-lbl">DB Tables</div>
+    </div>
+    <div class="stat-card" style="--d:0.15s">
+      <div class="stat-icon">🧠</div>
+      <div class="stat-val">∞</div>
+      <div class="stat-lbl">Memory</div>
+    </div>
+    <div class="stat-card" style="--d:0.2s">
+      <div class="stat-icon">⚡</div>
+      <div class="stat-val">4096</div>
+      <div class="stat-lbl">Max Tokens</div>
+    </div>
+  </div>
+
+  <!-- BUILDER -->
+  <div class="builder-card">
+    <div class="builder-emoji">👨‍💻</div>
+    <div>
+      <div class="builder-label">Built by</div>
+      <div class="builder-name">Aman</div>
+      <div class="builder-desc">EDITH is a personal project — a fully custom AI operating system built from scratch. No templates, no boilerplate. Every line of code written to solve real daily productivity problems. Built with Node.js, React, MySQL, and the Anthropic Claude API.</div>
+    </div>
+  </div>
+
+  <!-- WHAT IS EDITH -->
+  <div class="what-card">
+    <h2>🤔 What is EDITH?</h2>
+    <p>EDITH is not a chatbot. It's a <strong>personal AI operating system</strong> — a digital twin that knows your communication style, remembers your decisions, manages your tasks, reads your emails, monitors your Slack, and queries your business data.</p>
+    <p>Unlike generic AI assistants, EDITH is designed to be <strong>deeply personalized</strong>. It learns your preferences over time, stores long-term memories across conversations, and gets smarter the more you use it.</p>
+    <p>The core idea: <span class="hl">what if your AI assistant actually knew you</span> — your role, your priorities, your VIP contacts, your communication style — and acted as a true second brain rather than a general-purpose tool?</p>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('features', this)">✨ Features</button>
+    <button class="tab-btn" onclick="switchTab('coming', this)">🚀 Coming Soon</button>
+    <button class="tab-btn" onclick="switchTab('tech', this)">⚙️ Tech Stack</button>
+    <button class="tab-btn" onclick="switchTab('changelog', this)">📋 Changelog</button>
+  </div>
+
+  <!-- FEATURES -->
+  <div id="panel-features" class="tab-panel active">
+    <div class="feature-grid" id="feature-grid"></div>
+  </div>
+
+  <!-- COMING SOON -->
+  <div id="panel-coming" class="tab-panel">
+    <div class="coming-grid" id="coming-grid"></div>
+  </div>
+
+  <!-- TECH STACK -->
+  <div id="panel-tech" class="tab-panel">
+    <div class="tech-grid" id="tech-grid"></div>
+    <div class="arch-card">
+      <div class="arch-title">🏗️ Architecture</div>
+      <pre class="arch-pre">Browser (React + Vite :5173)
+    │
+    │ HTTP + SSE streaming
+    ▼
+Express API (:3000)
+    │
+    ├── /api/chat      → claudeService.js
+    │       │               │
+    │       │               ├── Anthropic SDK (Claude Sonnet 4.6)
+    │       │               ├── Tool calling loop (15 tools)
+    │       │               ├── Memory injection
+    │       │               └── Conversation summarization
+    │       │
+    │       ├── toolExecutor.js
+    │       │       ├── Gmail API
+    │       │       ├── Slack Web API
+    │       │       ├── BigQuery
+    │       │       └── MySQL (tasks, memory, contacts)
+    │       │
+    │       └── memoryManager.js
+    │               ├── Keyword + recency + importance scoring
+    │               ├── Deduplication
+    │               └── Daily decay
+    │
+    └── MySQL 8.0 (192.168.27.157)
+            ├── conversations + messages
+            ├── memories
+            ├── tasks
+            ├── contacts
+            ├── email_cache
+            ├── oauth_tokens
+            └── context_snapshots</pre>
+    </div>
+  </div>
+
+  <!-- CHANGELOG -->
+  <div id="panel-changelog" class="tab-panel">
+    <div id="changelog-list"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-emoji">🤖</div>
+    <div class="footer-line1">Powered by <span style="color:var(--accent)">Claude</span></div>
+    <div class="footer-line2" id="footer-ver">EDITH v1.0 · 2026 · Every Day Intelligence &amp; Task Handler</div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+
+const FEATURES = [
+  { icon:'💬', title:'Intelligent Chat',      color:'#7c6af7', desc:'Full streaming conversation with Claude Sonnet. Remembers everything across sessions. Understands context, tone, and your working style.' },
+  { icon:'✉️', title:'Gmail Integration',     color:'#ef4444', desc:'Reads, searches, drafts, and sends emails in your voice. Auto-caches inbox. Flags VIP contacts. Extracts action items automatically.' },
+  { icon:'💬', title:'Slack Integration',     color:'#e879f9', desc:'Reads channel history, summarizes conversations, posts messages on your behalf. Stays up to date with your team without you asking.' },
+  { icon:'🧠', title:'Long-term Memory',      color:'#a855f7', desc:'Saves facts, preferences, decisions, and contacts across all conversations. Smart retrieval with keyword + recency + importance scoring. Auto-deduplication and decay.' },
+  { icon:'✅', title:'Task Management',       color:'#22c55e', desc:'Auto-extracts tasks from emails, Slack, and conversations. Prioritizes by urgency. Full CRUD with status tracking — pending, in progress, done, cancelled.' },
+  { icon:'📊', title:'BigQuery Analytics',    color:'#3b82f6', desc:'Connect your business data warehouse. Ask questions in plain English. EDITH writes the SQL, runs it, and interprets results as insights.' },
+  { icon:'🎤', title:'Voice Interface',       color:'#f59e0b', desc:'Full voice input via Web Speech API. Toggle voice output to hear EDITH read responses aloud. Hands-free operation in Chrome and Edge.' },
+  { icon:'🔍', title:'Execution Trace',       color:'#06b6d4', desc:'See exactly how EDITH thinks — every tool call, memory retrieval, context built, and token used. Full transparency into the AI brain.' },
+  { icon:'📦', title:'Export Everything',     color:'#84cc16', desc:'Export all conversations, memories, tasks, emails, and contacts as JSON or PDF. Per-conversation export from the sidebar. Your data is always yours.' },
+];
+
+const COMING_SOON = [
+  { icon:'☀️', title:'Daily Morning Briefing',  desc:'Auto-scheduled briefing every morning — emails, tasks, Slack digest, calendar — delivered without asking.' },
+  { icon:'📅', title:'Google Calendar',          desc:'Full calendar integration. EDITH knows your schedule, blocks focus time, preps for meetings, and sets reminders.' },
+  { icon:'🔔', title:'Push Notifications',       desc:'Browser notifications for urgent emails, @mentions on Slack, approaching deadlines, and VIP contact messages.' },
+  { icon:'📄', title:'Document Analysis',        desc:'Upload PDFs, contracts, reports. EDITH reads, summarizes, extracts key clauses, flags risks, creates action items.' },
+  { icon:'🎙️', title:'Meeting Intelligence',    desc:'Paste meeting transcripts or upload recordings. Auto-extract decisions, action items, and follow-ups.' },
+  { icon:'📈', title:'Analytics Dashboard',      desc:'Visual charts of your email volume, task completion rate, response times, busiest hours, and memory growth.' },
+  { icon:'🔎', title:'Universal Smart Search',   desc:'One search bar across all conversations, emails, memories, tasks, and contacts simultaneously.' },
+  { icon:'📊', title:'Weekly Report',            desc:"Auto-generated Sunday evening summary — what you accomplished, what's pending, key decisions made." },
+  { icon:'👥', title:'Contact Intelligence',     desc:'Build rich profiles from email/Slack patterns. Track relationship strength, response rates, topic history.' },
+  { icon:'🤖', title:'ElevenLabs Voice Clone',   desc:'Clone your voice for TTS output. EDITH reads responses back in your own voice.' },
+];
+
+const TECH_STACK = [
+  { label:'AI Brain',     value:'Claude Sonnet 4.6 + Haiku 4.5', color:'#7c6af7' },
+  { label:'Backend',      value:'Node.js + Express (ESM)',        color:'#22c55e' },
+  { label:'Frontend',     value:'React 18 + Vite',                color:'#3b82f6' },
+  { label:'Database',     value:'MySQL 8 (remote)',                color:'#f59e0b' },
+  { label:'Email',        value:'Gmail API (OAuth2)',              color:'#ef4444' },
+  { label:'Messaging',    value:'Slack Web API',                   color:'#e879f9' },
+  { label:'Analytics',    value:'Google BigQuery',                 color:'#06b6d4' },
+  { label:'Voice',        value:'Web Speech API',                  color:'#84cc16' },
+  { label:'Tool Calling', value:'Anthropic SDK (native)',          color:'#a855f7' },
+  { label:'Streaming',    value:'SSE (Server-Sent Events)',        color:'#fb923c' },
+];
+
+const CHANGELOG = [
+  {
+    version: 'v1.0 — Current', date: 'May 2026', color: 'var(--accent)',
+    items: [
+      '✅ Full Claude Sonnet 4.6 chat with streaming',
+      '✅ Gmail OAuth2 integration — read, draft, send, flag',
+      '✅ Slack bot integration — read channels, post messages',
+      '✅ Long-term memory with keyword + recency scoring',
+      '✅ Auto-extract memories, tasks, contacts from every message',
+      '✅ Conversation summarization for long chats (20+ messages)',
+      '✅ Execution trace panel — full AI transparency',
+      '✅ Voice input (STT) + voice output (TTS)',
+      '✅ Proactive quick action suggestions after responses',
+      '✅ Sidebar with rename, delete, pin, search',
+      '✅ Memory deduplication + importance decay',
+      '✅ Export to JSON + HTML/PDF',
+      '✅ BigQuery analytics integration',
+      '✅ Task management with priorities and status',
+      '✅ Dashboard with live email count and task overview',
+      '✅ Settings with one-click Gmail connect/disconnect',
+    ],
+  },
+  {
+    version: 'v1.1 — Next', date: 'Coming soon', color: 'var(--amber)',
+    items: [
+      '⏳ Daily morning briefing (auto-scheduled)',
+      '⏳ Email auto-triage background job',
+      '⏳ Browser push notifications for urgent items',
+      '⏳ Analytics dashboard with charts',
+      '⏳ Universal smart search across all data',
+      '⏳ Contact intelligence profiles',
+    ],
+  },
+  {
+    version: 'v1.2 — Future', date: 'Planned', color: 'var(--text3)',
+    items: [
+      '🔮 Google Calendar integration',
+      '🔮 Document + PDF analysis',
+      '🔮 Meeting transcript intelligence',
+      '🔮 Weekly auto-generated report',
+      '🔮 ElevenLabs voice cloning',
+      '🔮 Mobile app (React Native)',
+      '🔮 Multi-user support',
+    ],
+  },
+];
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+
+function renderFeatures() {
+  const grid = document.getElementById('feature-grid');
+  grid.innerHTML = FEATURES.map(f => `
+    <div class="feature-card" style="border-top: 3px solid ${f.color}">
+      <div class="feature-icon">${f.icon}</div>
+      <div class="feature-title" style="color:${f.color}">${f.title}</div>
+      <div class="feature-desc">${f.desc}</div>
+    </div>
+  `).join('');
+}
+
+function renderComing() {
+  const grid = document.getElementById('coming-grid');
+  grid.innerHTML = COMING_SOON.map(f => `
+    <div class="coming-card">
+      <span class="coming-soon-badge">SOON</span>
+      <div class="coming-icon">${f.icon}</div>
+      <div class="coming-title">${f.title}</div>
+      <div class="coming-desc">${f.desc}</div>
+    </div>
+  `).join('');
+}
+
+function renderTech() {
+  const grid = document.getElementById('tech-grid');
+  grid.innerHTML = TECH_STACK.map(t => `
+    <div class="tech-card">
+      <div class="tech-dot" style="background:${t.color}"></div>
+      <div>
+        <div class="tech-lbl">${t.label}</div>
+        <div class="tech-val">${t.value}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderChangelog() {
+  const list = document.getElementById('changelog-list');
+  list.innerHTML = CHANGELOG.map(v => `
+    <div class="changelog-entry" style="border-left: 3px solid ${v.color}">
+      <div class="cl-header">
+        <div class="cl-version" style="color:${v.color}">${v.version}</div>
+        <div class="cl-date">${v.date}</div>
+      </div>
+      <div class="cl-items">
+        ${v.items.map(i => `<div class="cl-item">${i}</div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+renderFeatures();
+renderComing();
+renderTech();
+renderChangelog();
+
+document.getElementById('footer-ver').textContent =
+  `EDITH v1.0 · ${new Date().getFullYear()} · Every Day Intelligence & Task Handler`;
+</script>
+</body>
+</html>
